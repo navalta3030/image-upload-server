@@ -1,0 +1,73 @@
+apiVersion: apps/{{ template "version.fullname" .}}
+kind: Deployment
+metadata:
+  name: {{ template "image_upload_server.fullname" .}}
+spec:
+  replicas: {{ template "replicas.fullname" .}}
+  selector:
+    matchLabels:
+      component: {{ template "image_upload_server.fullname" .}}
+  template:
+    metadata:
+      labels:
+        component: {{ template "image_upload_server.fullname" .}}
+        auto-deployment-helper: {{ randAlphaNum 5 | quote }}
+    spec:
+      containers:
+        - name: client
+          image: navalta3030/{{ template "image_upload_server.fullname" .}}
+          ports:
+            - containerPort: 8021
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+          env:
+            - name: AWS_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: AWS_ACCESS_KEY
+            - name: AWS_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: AWS_SECRET_KEY
+            - name: AWS_BUCKET_LINK
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: AWS_BUCKET_LINK
+            - name: AWS_BUCKET_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: AWS_BUCKET_REGION
+            - name: POSTGRES_SQL_DB
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: POSTGRES_SQL_DB
+            - name: S3_LINK
+              valueFrom:
+                secretKeyRef:
+                  name: mysecret
+                  key: S3_LINK
+          readinessProbe:
+            httpGet:
+              path: /test
+              port: 8021
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: {{ template "version.fullname" .}}
+kind: Service
+metadata:
+  name: {{ template "image_upload_server.fullname" .}}
+spec:
+  type: ClusterIP
+  selector:
+    component: {{ template "image_upload_server.fullname" .}}
+  ports:
+    - name: endpoint
+      port: 8021

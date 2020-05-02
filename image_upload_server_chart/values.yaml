@@ -1,0 +1,4 @@
+image_upload_server: image-upload-server
+replicas: "1"
+version: "v1"
+

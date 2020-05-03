@@ -19,17 +19,23 @@ func GetUserImage(requestBody io.ReadCloser) models.ImageCollection {
 		logError.Println(err)
 	}
 
+	logger.Println("Getting information image for " + user.Email)
+
 	// query join
 	dbErr := utils.UseDb().
 		Table("image_links").
 		Select("image_links.link, image_links.assistant_prediction, image_links.doctor_prediction").
 		Joins("join users on users.id = image_links.user_id").
 		Where("users.email = ?", user.Email).
-		Scan(&imageCollection)
+		Scan(&imageCollection.Data)
 
 	// error
 	if dbErr.Error != nil {
 		logError.Println(dbErr.Error)
+		return models.ImageCollection{}
+	}
+
+	if dbErr.RecordNotFound() {
 		return models.ImageCollection{}
 	}
 

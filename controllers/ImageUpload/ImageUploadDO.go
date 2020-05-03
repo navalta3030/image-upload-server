@@ -42,7 +42,7 @@ func ImageUploadDigitalOcean(files []*multipart.FileHeader, userForm string) int
 
 		// open and upload
 		f, _ := file.Open()
-		contentType := "image/" + filepath.Ext(file.Filename)
+		contentType := "image/" + filepath.Ext(file.Filename)[1:]
 		object := s3.PutObjectInput{
 			Body:        f,
 			Key:         aws.String("image_public/" + userModel.Email + "_" + file.Filename),

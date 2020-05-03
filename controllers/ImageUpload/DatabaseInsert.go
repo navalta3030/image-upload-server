@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"image_upload_server/constants"
 	"image_upload_server/models"
 	"image_upload_server/utils"
@@ -24,7 +25,7 @@ func InsertLinkToDatabase(user string, predictions models.ImagePredictAPI) {
 	for _, prediction := range predictions.Data {
 
 		imageLink = models.ImageLink{
-			Link:                constants.ImageLinkS3 + prediction[0],
+			Link:                fmt.Sprintf("%s%s_%s", constants.ImageLinkS3, userModel.Email, prediction[0]),
 			AssistantPrediction: prediction[1],
 			UserID:              userModel.ID,
 		}
